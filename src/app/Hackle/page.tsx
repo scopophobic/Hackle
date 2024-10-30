@@ -5,6 +5,9 @@ const Hackle = () => {
   const [likes, setLikes] = React.useState(0);
   // const [target, setTarget] = React.useState('');
   const [guess, setGuess] = React.useState("");
+
+  // guess and setGuess
+
   const [result, setResult] = React.useState("");
   const [grid, setGrid] = React.useState([""]);
 
@@ -13,7 +16,10 @@ const Hackle = () => {
   function handleClick() {
     if (guess.length != 5) return;
     setGrid((prevGrid) => [...prevGrid, guess]);
-    if (guess == targetValue) setResult("YOU WIN");
+    if (guess == targetValue) {
+        setResult("YOU WIN");
+        return;
+    }
     if (likes > 5 && guess != targetValue) {
       setResult("you lose hehe loser");
       return;
