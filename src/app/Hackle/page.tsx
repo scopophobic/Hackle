@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-
+import words from "@/data/Words 5";
 const Hackle = () => {
   const [likes, setLikes] = React.useState(0);
   // const [target, setTarget] = React.useState('');
@@ -13,12 +13,19 @@ const Hackle = () => {
 
   const targetValue = "CRANE";
 
+  const isWordValid = (word: string): boolean => {
+    return words.valid.includes(guess.toLowerCase()) || words.words.includes(guess.toLowerCase());
+  };
   function handleClick() {
+    if (!isWordValid(guess)) {
+      setResult("invalid input");
+      return;
+    }
     if (guess.length != 5) return;
     setGrid((prevGrid) => [...prevGrid, guess]);
     if (guess == targetValue) {
-        setResult("YOU WIN");
-        return;
+      setResult("YOU WIN");
+      return;
     }
     if (likes > 5 && guess != targetValue) {
       setResult("you lose hehe loser");
@@ -44,7 +51,11 @@ const Hackle = () => {
             {guess.split("").map((letter, i) => (
               <span
                 key={i}
-                className={`text-white p-1 rounded font-bold ${getLetterColor(letter, i)}`}>
+                className={`text-white p-1 rounded font-bold ${getLetterColor(
+                  letter,
+                  i
+                )}`}
+              >
                 {letter}
               </span>
             ))}
