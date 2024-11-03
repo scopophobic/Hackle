@@ -1,7 +1,9 @@
 "use client";
 import React from "react";
 import words from "@/data/Words 5";
+import  Keyboard  from "@/components/Keyboard";
 const Hackle = () => {
+  // const [Status, setStatus] = React.useState("playing");
   const [likes, setLikes] = React.useState(0);
   // const [target, setTarget] = React.useState('');
   const [guess, setGuess] = React.useState("");
@@ -17,21 +19,29 @@ const Hackle = () => {
     return words.valid.includes(guess.toLowerCase()) || words.words.includes(guess.toLowerCase());
   };
   function handleClick() {
+    setLikes(likes + 1);//likes exceeding 6 so fix
     if (!isWordValid(guess)) {
       setResult("invalid input");
       return;
     }
     if (guess.length != 5) return;
+    if (likes >= 6) {
+      return;
+    } 
     setGrid((prevGrid) => [...prevGrid, guess]);
+    setGuess("");
+    if (likes == 5 && guess != targetValue) {
+      setResult("you lose hehe loser");
+      return;
+    }
+    
+   
     if (guess == targetValue) {
       setResult("YOU WIN");
       return;
     }
-    if (likes > 5 && guess != targetValue) {
-      setResult("you lose hehe loser");
-      return;
-    }
-    setLikes(likes + 1);
+    
+    
   }
 
   const getLetterColor = (letter: string, index: number) => {
@@ -42,6 +52,17 @@ const Hackle = () => {
     }
     return "bg-gray-500";
   };
+
+  const handleKeyboardClick = (key) => {
+    if (key === "ENTER") {
+      handleClick();
+    } else if (key === "DELETE") {
+      setGuess((prev) => prev.slice(0, -1));
+    } else if (guess.length < 5) {
+      setGuess((prev) => prev + key);
+    }
+  };
+
   return (
     <div>
       <h3>Your Guesses:</h3>
@@ -65,6 +86,7 @@ const Hackle = () => {
       <input
         value={guess}
         onChange={(e) => setGuess(e.target.value.toUpperCase())}
+        onKeyDown={(e)=> e.key === 'Enter' && handleClick()}
         placeholder="Guess here"
         type="text"
         id="guess"
@@ -73,6 +95,7 @@ const Hackle = () => {
         Likes ({likes})
       </button>
       <p>{result}</p>
+      <Keyboard onkeyPress={handleKeyboardClick} />
     </div>
   );
 };
