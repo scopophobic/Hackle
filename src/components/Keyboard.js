@@ -1,10 +1,29 @@
 import React from "react";
-const Keyboard = ({onkeyPress}) => {
-    const rows = [
-      ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
-      ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
-      ["Z", "X", "C", "V", "B", "N", "M"],
-    ];
+// This component renders a keyboard for the word guessing game.
+const Keyboard = ({ onkeyPress, usedLetters }) => {
+  const rows = [
+    ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
+    ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
+    ["Z", "X", "C", "V", "B", "N", "M"],
+  ];
+
+  // //  NEW FUNCTION: Determines the background color of each key
+  // const getKeyColor = (letter) => {
+  //   if (usedLetters[letter] === "correct") return "#6aaa64"; // Green for correct letters
+  //   if (usedLetters[letter] === "misplaced") return "#c9b458"; // Yellow for misplaced letters
+  //   if (usedLetters[letter] === "incorrect") return "#787c7e"; // Gray for incorrect letters
+  //   return "#d3d6da"; // Default key color (light gray)
+  // };
+
+  //  UPDATED FUNCTION: Now applies the correct styles dynamically
+  const getKeyStyle = (letter) => {
+    if (usedLetters[letter] === "green") return "bg-green-500 text-white";
+    if (usedLetters[letter] === "yellow") return "bg-yellow-500 text-white";
+    if (usedLetters[letter] === "gray") return "bg-gray-500 text-white";
+    return "bg-gray-600 text-white"; // Default color for unused letters
+  };
+  
+
   return (
     <div className="keyboard">
       {rows.map((row, rowIndex) => (
@@ -13,7 +32,7 @@ const Keyboard = ({onkeyPress}) => {
             <button
               key={letter}
               onClick={() => onkeyPress(letter)}
-              className="p-2 bg-gray-600 rounded"
+              className={`p-2 rounded ${getKeyStyle(letter)}`}
             >
               {letter}
             </button>
@@ -37,4 +56,5 @@ const Keyboard = ({onkeyPress}) => {
     </div>
   );
 };
+
 export default Keyboard;

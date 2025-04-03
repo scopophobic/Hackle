@@ -1,3 +1,4 @@
+// page currently in use
 "use client";
 import React from "react";
 import words from "@/data/Words 5";
@@ -12,8 +13,9 @@ const Hackle = () => {
 
   const [result, setResult] = React.useState("");
   const [grid, setGrid] = React.useState([""]);
+  const [usedLetters, setUsedLetters] = React.useState<Record<string, string>>({});
 
-  const targetValue = "CRANE";
+  const targetValue = "CRANE";//set random val from dictionary per 24 hrss
 
   const isWordValid = (word: string): boolean => {
     return words.valid.includes(guess.toLowerCase()) || words.words.includes(guess.toLowerCase());
@@ -30,6 +32,7 @@ const Hackle = () => {
     } 
     setGrid((prevGrid) => [...prevGrid, guess]);
     setGuess("");
+    updateUsedLetters(guess);
     if (likes == 5 && guess != targetValue) {
       setResult("you lose hehe loser");
       return;
@@ -43,6 +46,23 @@ const Hackle = () => {
     
     
   }
+  const updateUsedLetters = (currentGuess: string) => {
+    const newUsedLetters = { ...usedLetters };
+  
+    currentGuess.split("").forEach((letter, index) => {
+      const color = getLetterColor(letter, index); // Reuse logic
+      if (color === "bg-green-500") {
+        newUsedLetters[letter] = "green";
+      } else if (color === "bg-yellow-500" && newUsedLetters[letter] !== "green") {
+        newUsedLetters[letter] = "yellow";
+      } else if (!newUsedLetters[letter]) {
+        newUsedLetters[letter] = "gray";
+      }
+    });
+  
+    setUsedLetters(newUsedLetters);
+  };
+  
 
   const getLetterColor = (letter: string, index: number) => {
     if (targetValue[index] === letter) {
@@ -53,7 +73,7 @@ const Hackle = () => {
     return "bg-gray-500";
   };
 
-  const handleKeyboardClick = (key) => {
+  const handleKeyboardClick = (key: string) => {
     if (key === "ENTER") {
       handleClick();
     } else if (key === "DELETE") {
@@ -64,19 +84,20 @@ const Hackle = () => {
   };
 
   return (
-    <div>
-      <h3>Your Guesses:</h3>
-      <ul>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
+      {/*  Change: Centered layout for better UX */}
+
+      <h3 className="text-2xl font-semibold mb-4">Your Guesses:</h3>
+
+      {/*  Change: Added spacing and centered grid */}
+      <ul className="space-y-2">
         {grid.map((guess, index) => (
-          <li key={index} className="flex gap-1">
-            {guess.split("").map((letter, i) => (
-              <span
-                key={i}
-                className={`text-white p-1 rounded font-bold ${getLetterColor(
-                  letter,
-                  i
-                )}`}
-              >
+          <li key={index} className="flex gap-2 justify-center">
+          {guess.split("").map((letter, i) => (
+            <span
+              key={i}
+              className={`text-white p-3 rounded-md text-lg font-bold ${getLetterColor(letter, i)}`}
+            >
                 {letter}
               </span>
             ))}
@@ -90,12 +111,18 @@ const Hackle = () => {
         placeholder="Guess here"
         type="text"
         id="guess"
+        className="mt-4 p-2 border-2 border-gray-400 rounded-md text-black w-40 text-center" // Centered input field and added padding
       ></input>
-      <button className="" onClick={handleClick}>
+      <button
+        className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg"
+        onClick={handleClick}
+      >
         Likes ({likes})
       </button>
-      <p>{result}</p>
-      <Keyboard onkeyPress={handleKeyboardClick} />
+      <p className="mt-4 text-lg font-bold">{result}</p>
+      <div className="mt-6 w-full max-w-md">
+        <Keyboard onkeyPress={handleKeyboardClick} usedLetters={usedLetters} />
+        </div>
     </div>
   );
 };
