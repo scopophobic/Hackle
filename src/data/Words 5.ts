@@ -1,4 +1,5 @@
 const words = {
+	// library of words
 	"words": [
 		"cigar",
 		"rebut",
