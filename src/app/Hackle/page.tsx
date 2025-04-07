@@ -3,54 +3,71 @@
 import React from "react";
 import words from "@/data/Words 5";
 import  Keyboard  from "@/components/Keyboard";
+import BinaryBackground from "@/components/BinaryBackground";
+
 const Hackle = () => {
-  // const [Status, setStatus] = React.useState("playing");
   const [likes, setLikes] = React.useState(0);
-  // const [target, setTarget] = React.useState('');
   const [guess, setGuess] = React.useState("");
-
-  // guess and setGuess
-
   const [result, setResult] = React.useState("");
   const [grid, setGrid] = React.useState([""]);
   const [usedLetters, setUsedLetters] = React.useState<Record<string, string>>({});
 
-  const targetValue = "CRANE";//set random val from dictionary per 24 hrss
+  const targetValue = "ARRAY"; // TODO: set random val from dictionary per 24 hrs
 
+  // UPDATED: isWordValid uses Gemini API call
+  // const isWordValid = async (word: string): Promise<boolean> => {
+  //   try {
+  //     const res = await fetch("/api/validate-word", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json"
+  //       },
+  //       body: JSON.stringify({ word })
+  //     });
+
+  //     const data = await res.json();
+  //     return data.valid;
+  //   } catch (error) {
+  //     console.error("Validation error:", error);
+  //     return false;
+  //   }
+  // };
   const isWordValid = (word: string): boolean => {
     return words.valid.includes(guess.toLowerCase()) || words.words.includes(guess.toLowerCase());
   };
-  function handleClick() {
-    setLikes(likes + 1);//likes exceeding 6 so fix
-    if (!isWordValid(guess)) {
+
+  // UPDATED: handleClick is now async for Gemini call
+  const handleClick = async () => {
+    if (guess.length !== 5) return;
+    if (likes >= 6) return;
+
+    const valid = await isWordValid(guess);
+    if (!valid) {
       setResult("invalid input");
       return;
     }
-    if (guess.length != 5) return;
-    if (likes >= 6) {
-      return;
-    } 
+
+    setLikes(likes + 1);
     setGrid((prevGrid) => [...prevGrid, guess]);
     setGuess("");
     updateUsedLetters(guess);
-    if (likes == 5 && guess != targetValue) {
+
+    if (likes === 5 && guess !== targetValue) {
       setResult("you lose hehe loser");
       return;
     }
-    
-   
-    if (guess == targetValue) {
+
+    if (guess === targetValue) {
       setResult("YOU WIN");
       return;
     }
-    
-    
-  }
+  };
+
   const updateUsedLetters = (currentGuess: string) => {
     const newUsedLetters = { ...usedLetters };
-  
+
     currentGuess.split("").forEach((letter, index) => {
-      const color = getLetterColor(letter, index); // Reuse logic
+      const color = getLetterColor(letter, index);
       if (color === "bg-green-500") {
         newUsedLetters[letter] = "green";
       } else if (color === "bg-yellow-500" && newUsedLetters[letter] !== "green") {
@@ -59,10 +76,9 @@ const Hackle = () => {
         newUsedLetters[letter] = "gray";
       }
     });
-  
+
     setUsedLetters(newUsedLetters);
   };
-  
 
   const getLetterColor = (letter: string, index: number) => {
     if (targetValue[index] === letter) {
@@ -84,45 +100,57 @@ const Hackle = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
-      {/*  Change: Centered layout for better UX */}
+    <div className="relative min-h-screen bg-white text-black flex flex-col items-center justify-center overflow-hidden">
+    {/* Background */}
+    <BinaryBackground />
 
+    {/* Game Content in Front */}
+      <div className="relative z-10">
       <h3 className="text-2xl font-semibold mb-4">Your Guesses:</h3>
 
-      {/*  Change: Added spacing and centered grid */}
+      {/* UI: Grid display */}
       <ul className="space-y-2">
         {grid.map((guess, index) => (
           <li key={index} className="flex gap-2 justify-center">
-          {guess.split("").map((letter, i) => (
-            <span
-              key={i}
-              className={`text-white p-3 rounded-md text-lg font-bold ${getLetterColor(letter, i)}`}
-            >
+            {guess.split("").map((letter, i) => (
+              <span
+                key={i}
+                className={`text-white p-3 rounded-md text-lg font-bold ${getLetterColor(letter, i)}`}
+              >
                 {letter}
               </span>
             ))}
           </li>
         ))}
       </ul>
+
+      {/* Input Field */}
       <input
         value={guess}
         onChange={(e) => setGuess(e.target.value.toUpperCase())}
-        onKeyDown={(e)=> e.key === 'Enter' && handleClick()}
+        onKeyDown={(e) => e.key === "Enter" && handleClick()}
         placeholder="Guess here"
         type="text"
         id="guess"
-        className="mt-4 p-2 border-2 border-gray-400 rounded-md text-black w-40 text-center" // Centered input field and added padding
-      ></input>
+        className="mt-4 p-2 border-2 border-gray-400 rounded-md text-black w-40 text-center"
+      />
+
+      {/* Submit Button */}
       <button
         className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg"
         onClick={handleClick}
       >
         Likes ({likes})
       </button>
+
+      {/* Result */}
       <p className="mt-4 text-lg font-bold">{result}</p>
+
+      {/* Keyboard */}
       <div className="mt-6 w-full max-w-md">
         <Keyboard onkeyPress={handleKeyboardClick} usedLetters={usedLetters} />
-        </div>
+      </div>
+    </div>
     </div>
   );
 };
